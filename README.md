@@ -127,7 +127,7 @@ O sistema implementa controle de acesso robusto:
 
 - **Candidato:**
   - Cadastra e visualiza currículos próprios
-  - Visualiza vagas e se candidata
+  - Visualiza vagas
 - **Empregador:**
   - Cadastra vagas, visualiza suas vagas
   - Visualiza currículos (com filtros e ranking)
