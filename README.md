@@ -4,7 +4,7 @@
 
 # Portal de Oportunidades - Documentação Completa
 
-Um sistema profissional de gestão de vagas e currículos com busca inteligente (RAG), controle de acesso por perfil, e integração com MongoDB Atlas e Google Gemini (Generative AI).
+Um sistema de gestão de vagas e currículos com busca inteligente (RAG), controle de acesso por perfil, e integração com MongoDB Atlas e Google Gemini (Generative AI).
 
 ---
 
