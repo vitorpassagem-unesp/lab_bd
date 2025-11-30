@@ -28,7 +28,6 @@ if st.session_state.authenticated:
             st.page_link("pages/11_Admin_-_Dashboard.py", label="📊 Dashboard e Estatísticas")
         with col2:
             st.page_link("pages/2_Geral_-_Listagem_de_Vagas.py", label="📋 Ver todas as vagas")
-            st.page_link("pages/9_Admin_-_Listagem_de_Curriculos.py", label="📄 Ver todos os currículos")
     
     elif user_perfil == "empregador":
         st.subheader("💼 Painel do Empregador")

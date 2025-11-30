@@ -5,7 +5,7 @@ from utils.ui import require_perfil
 
 st.set_page_config(page_title="Meus Currículos", page_icon="📄", layout="wide")
 
-require_perfil(["candidato"])
+require_perfil(["candidato", "administrador"])
 
 st.title("Meus Currículos")
 st.page_link("app.py", label="Voltar para a página inicial", icon="🏠")
