@@ -1,248 +1,256 @@
-# Portal de Oportunidades - MongoDB
 
-Sistema de gestão de vagas e currículos usando Streamlit e MongoDB.
+> **Trabalho para a disciplina de Laboratório de Banco de Dados, UNESP Rio Claro, 2025.**  
+> **Alunos: Vitor Passagem e Pedro Bastos**
 
-## Requisitos
+# Portal de Oportunidades - Documentação Completa
+
+Um sistema profissional de gestão de vagas e currículos com busca inteligente (RAG), controle de acesso por perfil, e integração com MongoDB Atlas e Google Gemini (Generative AI).
+
+---
+
+## Sumário
+
+- [Visão Geral](#visão-geral)
+- [Infraestrutura e Tecnologias](#infraestrutura-e-tecnologias)
+- [Funcionalidades e Mapeamento de Código](#funcionalidades-e-mapeamento-de-código)
+- [Permissões e Perfis de Usuário](#permissões-e-perfis-de-usuário)
+- [Sistema de Busca Inteligente (RAG)](#sistema-de-busca-inteligente-rag)
+- [Configuração e Deploy](#configuração-e-deploy)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Solução de Problemas](#solução-de-problemas)
+- [Próximos Passos](#próximos-passos)
+
+---
+
+## Visão Geral
+
+Este portal permite:
+
+- Cadastro e autenticação de usuários (candidato, empregador, administrador)
+- Cadastro e listagem de vagas e currículos
+- Busca inteligente (RAG) por vagas e currículos usando Google Gemini e MongoDB Atlas
+- Matching automático entre vagas e currículos com score
+- Dashboard administrativo com estatísticas e mapas
+- Controle de acesso robusto por perfil
+
+Deploy de produção: [Streamlit Cloud](https://sistema-curriculos.streamlit.app/)
+
+---
+
+## Infraestrutura e Tecnologias
+
+### Principais Componentes
+
+- **Frontend:** [Streamlit](https://streamlit.io/) (UI, navegação, autenticação)
+- **Backend:** Python 3.8+, [PyMongo](https://pymongo.readthedocs.io/) (acesso ao MongoDB)
+- **Banco de Dados:** [MongoDB Atlas](https://www.mongodb.com/atlas) (coleções: `usuarios`, `vagas`, `curriculos`)
+- **Busca Inteligente (RAG):** [Google Generative AI (Gemini)](https://ai.google.dev/) + MongoDB Atlas Vector Search
+- **Outros:** Pandas, Protobuf
+
+### Dependências
+
+Veja `requirements.txt` para a lista completa:
+
+```
+streamlit>=1.30.0
+pandas>=2.0.0
+pymongo>=4.6.0
+google-generativeai>=0.3.0
+protobuf>=4.25.0
+```
+
+---
+
+## Funcionalidades e Mapeamento de Código
+
+### 1. Autenticação e Controle de Acesso
+
+- **Cadastro/Login:**
+  - `app.py` (login, menu dinâmico por perfil)
+  - `pages/1_Geral_-_Cadastro_de_Usuario.py` (cadastro de usuário)
+  - Funções: `validate_credentials`, `add_user` em `utils/data_io.py`
+- **Controle de Permissões:**
+  - Funções: `require_perfil`, `require_authentication` em `utils/ui.py`
+
+### 2. Gestão de Vagas
+
+- **Listagem Pública e Filtros:**
+  - `pages/2_Geral_-_Listagem_de_Vagas.py` (filtros, dataframe, busca RAG)
+  - Função: `load_vagas` em `utils/data_io.py`
+- **Cadastro de Vagas:**
+  - `pages/6_Empregador_-_Cadastro_de_Vaga.py`
+  - Função: `add_vaga` em `utils/data_io.py`
+- **Minhas Vagas (Empregador):**
+  - `pages/7_Empregador_-_Minhas_Vagas.py` (ranking de currículos)
+  - Função: `load_vagas_by_empregador`
+
+### 3. Gestão de Currículos
+
+- **Cadastro de Currículo:**
+  - `pages/4_Candidato_-_Cadastro_de_Curriculo.py`
+  - Função: `add_curriculo` em `utils/data_io.py`
+- **Meus Currículos (Candidato):**
+  - `pages/3_Candidato_-_Meus_Curriculos.py`
+  - Função: `load_curriculos_by_candidato`
+- **Listagem de Currículos (Admin/Empregador):**
+  - `pages/9_Empregador_-_Listagem_de_Curriculos.py`
+  - Função: `load_curriculos`
+
+### 4. Matching Automático (Score de Compatibilidade)
+
+- **Ranking de Currículos para Vaga:**
+  - `pages/7_Empregador_-_Minhas_Vagas.py` (ranking por score)
+  - Função: `calcular_score_curriculo` em `utils/data_io.py`
+  - Algoritmo: Combina Full Text Search, localização e experiência
+
+### 5. Busca Inteligente (RAG)
+
+- **Busca Natural em Vagas:**
+  - `pages/2_Geral_-_Listagem_de_Vagas.py` (seção "Busca Natural em Vagas (RAG)")
+  - Usa Google Gemini para embedding + MongoDB Atlas Vector Search
+- **Busca Natural em Currículos:**
+  - `pages/9_Empregador_-_Listagem_de_Curriculos.py` (seção "Busca Natural em Currículos (RAG)")
+  - Usa Google Gemini para embedding + MongoDB Atlas Vector Search
+
+### 6. Dashboard e Administração
+
+- **Dashboard Estatístico:**
+  - `pages/11_Admin_-_Dashboard.py` (métricas, gráficos, mapas)
+- **Gerenciamento de Usuários:**
+  - `pages/10_Admin_-_Gerenciar_Usuarios.py`
+
+---
+
+## Permissões e Perfis de Usuário
+
+O sistema implementa controle de acesso robusto:
+
+- **Candidato:**
+  - Cadastra e visualiza currículos próprios
+  - Visualiza vagas e se candidata
+- **Empregador:**
+  - Cadastra vagas, visualiza suas vagas
+  - Visualiza currículos (com filtros e ranking)
+- **Administrador:**
+  - Acesso total: gerencia usuários, dashboard, todas as vagas/currículos
+
+Controle implementado via `require_perfil` e checagem de sessão em cada página.
+
+---
+
+## Sistema de Busca Inteligente (RAG)
+
+### Como Funciona
+
+1. Usuário digita uma pergunta (ex: "Quais vagas para Python remoto?")
+2. Gemini gera embedding da pergunta
+3. MongoDB Atlas Vector Search retorna documentos mais próximos
+4. Gemini gera resposta textual baseada apenas no contexto retornado
+
+### Implementação
+
+- **Vagas:**
+  - Funções: `gerarEmbeddingsPerguntas_vagas`, `getDocsMongodbAtlas_vagas`, `gerarPrompt_vagas` em `pages/2_Geral_-_Listagem_de_Vagas.py`
+- **Currículos:**
+  - Funções: `gerarEmbeddingsPerguntas_curriculos`, `getDocsMongodbAtlas_curriculos`, `gerarPrompt_curriculos` em `pages/9_Empregador_-_Listagem_de_Curriculos.py`
+
+### Observações
+
+- O contexto enviado ao Gemini é limitado para evitar vazamento de dados
+- O modelo só responde com base no contexto retornado do banco
+
+---
+
+## Configuração e Deploy
+
+### 1. Pré-requisitos
 
 - Python 3.8+
-- MongoDB 4.4+ (local ou remoto)
-- Bibliotecas Python (veja requirements.txt)
+- Conta no [MongoDB Atlas](https://www.mongodb.com/atlas) (ou MongoDB local)
+- Chave de API do Google Gemini
 
-## Configuração Inicial
+### 2. Instalação
 
-### 1. Instalar MongoDB
-
-**Windows:**
-```bash
-# Baixe e instale MongoDB Community Server de:
-# https://www.mongodb.com/try/download/community
-
-# Inicie o serviço MongoDB
-net start MongoDB
-```
-
-**Linux/Mac:**
-```bash
-# Ubuntu/Debian
-sudo apt-get install mongodb
-
-# Mac (usando Homebrew)
-brew install mongodb-community
-brew services start mongodb-community
-```
-
-### 2. Instalar Dependências Python
-
-```bash
-pip install streamlit pandas pymongo
-```
-
-Ou use o arquivo requirements.txt:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configurar MongoDB (Opcional)
+### 3. Configuração do Banco
 
-Se quiser configurar usuário e índices personalizados, edite e execute:
+Por padrão, conecta em `mongodb+srv://admin:admin@labbd.tapfnsh.mongodb.net/sistema_curriculos`.
+Para customizar, defina as variáveis de ambiente:
 
-```bash
-mongosh < setup_mongo.js
 ```
-
-### 4. **Configurar Índices de Full Text Search (IMPORTANTE)**
-
-O sistema utiliza Full Text Search do MongoDB para matching automático entre currículos e vagas. Execute:
-
-```bash
-python create_text_index.py
-```
-
-Este script cria índices de texto otimizados nas coleções de currículos e vagas, permitindo:
-- Busca inteligente com TF-IDF
-- Score automático de compatibilidade
-- Suporte a idioma português (stemming e stop words)
-
-**📖 Para detalhes sobre o algoritmo de matching, consulte [SISTEMA_MATCHING.md](SISTEMA_MATCHING.md)**
-
-### 5. Importar Dados CSV para MongoDB
-
-Execute o script de importação para migrar os dados existentes:
-
-```bash
-python import_csv_to_mongo.py
-```
-
-### 6. Configurar Variáveis de Ambiente (Opcional)
-
-Por padrão, a aplicação conecta em `mongodb://localhost:27017/` com database `sistema_curriculos`.
-
-Para customizar, crie um arquivo `.env`:
-
-```env
-MONGO_URI=mongodb://localhost:27017/
+MONGO_URI=<sua_uri>
 MONGO_DB_NAME=sistema_curriculos
 ```
 
-## Executar a Aplicação
+### 4. Executando Localmente
 
 ```bash
 streamlit run app.py
 ```
 
-A aplicação estará disponível em `http://localhost:8501`
+### 5. Deploy em Produção
 
-## Estrutura do Banco de Dados
+- Recomendado: [Streamlit Cloud](https://streamlit.io/cloud)
+- Configure variáveis de ambiente e secrets para as chaves do MongoDB e Gemini
 
-### Collections
+---
 
-- **usuarios**: Usuários do sistema com login e senha
-- **vagas**: Vagas abertas cadastradas
-- **curriculos**: Currículos de candidatos
 
-### Campos das Vagas
+## Estrutura de Páginas e Controle de Acesso
 
-- titulo
-- descricao
-- cidade
-- estado
-- tipo_contratacao (CLT, PJ, Estágio, Temporário)
-- salario
-- empresa
-- skills
+O sistema está organizado em setores, com prefixos numéricos e nomes descritivos para facilitar a navegação e o controle de acesso. Cada página utiliza a função `require_perfil()` para garantir que apenas usuários autorizados possam acessá-la.
 
-### Campos dos Currículos
+### Organização Atual das Páginas
 
-- id
-- nome
-- email
-- telefone
-- formacao
-- experiencia
-- skills
-- idiomas
-- certificacoes
-- resumo
-- empresas_previas
-- ids_contatos
+#### Geral (Público)
+- **1_Geral_-_Cadastro_de_Usuario.py** — Registro de novos usuários (candidato, empregador, admin)
+- **2_Geral_-_Listagem_de_Vagas.py** — Visualização pública de vagas com filtros e busca inteligente (RAG)
 
-## Funcionalidades
+#### Candidato (Acesso: Candidato)
+- **3_Candidato_-_Meus_Curriculos.py** — Lista de currículos do candidato logado
+- **4_Candidato_-_Cadastro_de_Curriculo.py** — Formulário para criar novo currículo
 
-### 🔐 Autenticação e Perfis
-- **3 tipos de usuário**: Candidato, Empregador, Administrador
-- Sistema de login com controle de acesso por perfil
+#### Empregador (Acesso: Empregador, Administrador)
+- **6_Empregador_-_Cadastro_de_Vaga.py** — Formulário para publicar nova vaga
+- **7_Empregador_-_Minhas_Vagas.py** — Lista de vagas criadas pelo empregador, ranking de currículos
 
-### 📋 Gestão de Vagas
-- Listagem pública com filtros (estado, tipo, empresa, skills)
-- Cadastro de vagas (empregadores)
-- Visualização de vagas por empregador
+#### Admin (Acesso: Administrador)
+- **9_Empregador_-_Listagem_de_Curriculos.py** — Visualização completa de todos os currículos com filtros avançados e busca RAG
+- **10_Admin_-_Gerenciar_Usuarios.py** — Gestão de usuários do sistema
+- **11_Admin_-_Dashboard.py** — Estatísticas, métricas e mapa geográfico de vagas
 
-### 📄 Gestão de Currículos
-- Cadastro completo de currículos (candidatos)
-- Listagem de currículos próprios
-- Filtros avançados (idiomas, certificações, experiência, skills)
+> **Nota:** As páginas são exibidas no menu lateral do Streamlit em ordem numérica, agrupadas por setor. O controle de acesso é feito por `require_perfil(["perfil"])` no início de cada página.
 
-### ⭐ Matching Automático (DESTAQUE)
-**Sistema de pontuação automática usando MongoDB Full Text Search**
+### Benefícios da Estrutura
+- Organização visual clara por setor
+- Nomenclatura consistente e fácil de manter
+- Compatibilidade total com Streamlit (sem subpastas)
+- Ordem lógica e agrupamento funcional
 
-O sistema calcula automaticamente um **score de compatibilidade de 0 a 100** entre currículos e vagas:
+---
 
-- **60%**: Text Search Score do MongoDB (TF-IDF)
-  - Analisa skills, formação, experiência e descrição
-  - Calcula relevância automática dos termos
-  - Suporte a português (stemming)
-
-- **20%**: Localização geográfica
-  - Match de estado/cidade
-
-- **20%**: Anos de experiência
-  - Graduação por faixa de experiência
-
-**Como funciona:**
-1. Empregador seleciona uma vaga
-2. MongoDB busca currículos usando `$text` search
-3. Sistema calcula score composto automaticamente
-4. Exibe ranking dos 10 melhores currículos
-
-**Documentação completa:** [SISTEMA_MATCHING.md](SISTEMA_MATCHING.md)
-
-### 📊 Dashboard Administrativo
-- Estatísticas gerais do sistema
-- Distribuição geográfica de vagas
-- Top empresas e skills mais demandadas
-- Mapa interativo com concentração de vagas
-
-## Solução de Problemas
-
-### Erro de conexão com MongoDB
-
-Verifique se o MongoDB está rodando:
-```bash
-# Windows
-net start MongoDB
-
-# Linux/Mac
-sudo systemctl status mongodb
-# ou
-brew services list
-```
-
-### Import "pymongo" could not be resolved
-
-Instale o pymongo:
-```bash
-pip install pymongo
-```
-
-### Dados não aparecem
-
-Execute o script de importação novamente:
-```bash
-python import_csv_to_mongo.py
-```
-
-## Desenvolvimento
-
-### Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 lab_bd/
-├── app.py                                    # Página principal (login)
+├── app.py                        # Página principal (login, menu)
 ├── pages/
-│   ├── 1_Geral_-_Cadastro_de_Usuario.py     # Registro público
-│   ├── 2_Geral_-_Listagem_de_Vagas.py       # Vagas + Matching
-│   ├── 3_Candidato_-_Meus_Curriculos.py     # Currículos do candidato
+│   ├── 1_Geral_-_Cadastro_de_Usuario.py
+│   ├── 2_Geral_-_Listagem_de_Vagas.py
+│   ├── 3_Candidato_-_Meus_Curriculos.py
 │   ├── 4_Candidato_-_Cadastro_de_Curriculo.py
 │   ├── 6_Empregador_-_Cadastro_de_Vaga.py
 │   ├── 7_Empregador_-_Minhas_Vagas.py
-│   ├── 9_Admin_-_Listagem_de_Curriculos.py  # Todos os currículos
+│   ├── 9_Empregador_-_Listagem_de_Curriculos.py
 │   ├── 10_Admin_-_Gerenciar_Usuarios.py
-│   └── 11_Admin_-_Dashboard.py              # Estatísticas
+│   └── 11_Admin_-_Dashboard.py
 ├── utils/
-│   ├── data_io.py                           # MongoDB + Algoritmo de Matching
-│   └── ui.py                                # Controle de acesso
-├── create_text_index.py                     # Script de configuração FTS
-├── import_csv_to_mongo.py                   # Importação de dados
-├── SISTEMA_MATCHING.md                      # 📖 Documentação do Matching
-├── ESTRUTURA_PAGINAS.md                     # Organização das páginas
-└── README.md                                # Este arquivo
+│   ├── data_io.py                 # Funções de acesso a dados e matching
+│   └── ui.py                      # Controle de sessão e permissões
+├── requirements.txt
+├── README.md
+└── ...
 ```
-
-### Tecnologias
-
-- **Backend**: Python 3.8+, PyMongo
-- **Frontend**: Streamlit
-- **Banco de Dados**: MongoDB 4.4+ com Full Text Search
-- **Matching**: TF-IDF (Term Frequency-Inverse Document Frequency)
-
-## Próximos Passos
-
-- [x] ✅ Implementar Full Text Search no MongoDB
-- [x] ✅ Sistema de matching automático com score
-- [x] ✅ Dashboard com estatísticas e mapa
-- [x] ✅ Controle de acesso por perfil
-- [ ] Adicionar hash de senhas (bcrypt)
-- [ ] Paginação nas listagens
-- [ ] Exportar relatórios para CSV/Excel
-- [ ] Sinônimos no text search (JS → JavaScript)
-- [ ] Machine Learning para ajuste de pesos
