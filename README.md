@@ -1,9 +1,11 @@
 
+
 > **Trabalho para a disciplina de Laboratório de Banco de Dados, UNESP Rio Claro, 2025.**  
 > **Alunos: Vitor Passagem e Pedro Bastos**
 
-
 # Portal de Oportunidades - Documentação Completa
+
+Um sistema de gestão de vagas e currículos com busca inteligente (RAG), controle de acesso por perfil, e integração com MongoDB Atlas e Google Gemini (Generative AI).
 
 ## Usuários de Teste
 
@@ -14,8 +16,6 @@ Estes usuários podem ser utilizados para acessar o sistema em diferentes perfis
 | admin      | admin      | Administrador  |
 | candidato  | candidato  | Candidato      |
 | empregador | empregador | Empregador     |
-
-Um sistema profissional de gestão de vagas e currículos com busca inteligente (RAG), controle de acesso por perfil, e integração com MongoDB Atlas e Google Gemini (Generative AI).
 
 ---
 
@@ -54,7 +54,7 @@ Deploy de produção: [Streamlit Cloud](https://sistema-curriculos.streamlit.app
 
 - **Frontend:** [Streamlit](https://streamlit.io/) (UI, navegação, autenticação)
 - **Backend:** Python 3.8+, [PyMongo](https://pymongo.readthedocs.io/) (acesso ao MongoDB)
-- **Banco de Dados:** [MongoDB Atlas](https://www.mongodb.com/atlas) (coleções: `usuarios`, `vagas`, `curriculos`)
+- **Banco de Dados:** [MongoDB Atlas](https://www.mongodb.com/atlas) (coleções: `usuarios`, `vagas`, `curriculos`, `empresas`)
 - **Busca Inteligente (RAG):** [Google Generative AI (Gemini)](https://ai.google.dev/) + MongoDB Atlas Vector Search
 - **Outros:** Pandas, Protobuf
 
@@ -138,7 +138,7 @@ O sistema implementa controle de acesso robusto:
 
 - **Candidato:**
   - Cadastra e visualiza currículos próprios
-  - Visualiza vagas e se candidata
+  - Visualiza vagas
 - **Empregador:**
   - Cadastra vagas, visualiza suas vagas
   - Visualiza currículos (com filtros e ranking)
@@ -204,8 +204,7 @@ streamlit run app.py
 
 ### 5. Deploy em Produção
 
-- Recomendado: [Streamlit Cloud](https://streamlit.io/cloud)
-- Configure variáveis de ambiente e secrets para as chaves do MongoDB e Gemini
+- Utilizado: [Streamlit Cloud](https://streamlit.io/cloud)
 
 ---
 
@@ -234,12 +233,6 @@ O sistema está organizado em setores, com prefixos numéricos e nomes descritiv
 - **11_Admin_-_Dashboard.py** — Estatísticas, métricas e mapa geográfico de vagas
 
 > **Nota:** As páginas são exibidas no menu lateral do Streamlit em ordem numérica, agrupadas por setor. O controle de acesso é feito por `require_perfil(["perfil"])` no início de cada página.
-
-### Benefícios da Estrutura
-- Organização visual clara por setor
-- Nomenclatura consistente e fácil de manter
-- Compatibilidade total com Streamlit (sem subpastas)
-- Ordem lógica e agrupamento funcional
 
 ---
 
