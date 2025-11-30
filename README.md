@@ -193,8 +193,7 @@ streamlit run app.py
 
 ### 5. Deploy em Produção
 
-- Recomendado: [Streamlit Cloud](https://streamlit.io/cloud)
-- Configure variáveis de ambiente e secrets para as chaves do MongoDB e Gemini
+- Utilizado: [Streamlit Cloud](https://streamlit.io/cloud)
 
 ---
 
@@ -223,12 +222,6 @@ O sistema está organizado em setores, com prefixos numéricos e nomes descritiv
 - **11_Admin_-_Dashboard.py** — Estatísticas, métricas e mapa geográfico de vagas
 
 > **Nota:** As páginas são exibidas no menu lateral do Streamlit em ordem numérica, agrupadas por setor. O controle de acesso é feito por `require_perfil(["perfil"])` no início de cada página.
-
-### Benefícios da Estrutura
-- Organização visual clara por setor
-- Nomenclatura consistente e fácil de manter
-- Compatibilidade total com Streamlit (sem subpastas)
-- Ordem lógica e agrupamento funcional
 
 ---
 
