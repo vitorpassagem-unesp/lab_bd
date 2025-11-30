@@ -1,7 +1,10 @@
+
+
+
 import streamlit as st
 import pandas as pd
 
-from utils.data_io import load_vagas, load_curriculos, load_candidaturas
+from utils.data_io import load_vagas, load_curriculos
 from utils.ui import require_perfil
 
 st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
@@ -14,24 +17,15 @@ st.page_link("app.py", label="Voltar para a página inicial", icon="🏠")
 # Carregar dados
 vagas_df = load_vagas()
 curriculos_df = load_curriculos()
-candidaturas = load_candidaturas()
 
 # Métricas gerais
 st.subheader("📈 Métricas Gerais")
-col1, col2, col3, col4 = st.columns(4)
+col1, col2 = st.columns(2)
 
 with col1:
     st.metric("Total de Vagas", len(vagas_df))
 with col2:
     st.metric("Total de Currículos", len(curriculos_df))
-with col3:
-    st.metric("Total de Candidaturas", len(candidaturas))
-with col4:
-    if len(vagas_df) > 0:
-        taxa = (len(candidaturas) / len(vagas_df))
-        st.metric("Candidaturas/Vaga", f"{taxa:.1f}")
-    else:
-        st.metric("Candidaturas/Vaga", "0")
 
 st.divider()
 

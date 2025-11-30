@@ -37,7 +37,6 @@ if st.session_state.authenticated:
             st.page_link("pages/6_Empregador_-_Cadastro_de_Vaga.py", label="➕ Cadastrar nova vaga")
             st.page_link("pages/7_Empregador_-_Minhas_Vagas.py", label="📋 Minhas vagas")
         with col2:
-            st.page_link("pages/8_Empregador_-_Candidaturas_Recebidas.py", label="👥 Ver candidaturas recebidas")
             st.page_link("pages/2_Geral_-_Listagem_de_Vagas.py", label="🔍 Buscar vagas com ranking de currículos")
     
     elif user_perfil == "candidato":
@@ -48,7 +47,6 @@ if st.session_state.authenticated:
             st.page_link("pages/3_Candidato_-_Meus_Curriculos.py", label="📄 Meus currículos")
         with col2:
             st.page_link("pages/2_Geral_-_Listagem_de_Vagas.py", label="🔍 Buscar vagas")
-            st.page_link("pages/5_Candidato_-_Minhas_Candidaturas.py", label="📬 Minhas candidaturas")
     
     st.divider()
     if st.button("Sair", type="primary"):

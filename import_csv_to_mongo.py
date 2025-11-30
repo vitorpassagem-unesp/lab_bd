@@ -10,7 +10,7 @@ from pathlib import Path
 from pymongo import MongoClient
 
 # Configuração
-MONGO_URI = "mongodb://localhost:27017/"
+MONGO_URI = "mongodb+srv://admin:admin@labbd.tapfnsh.mongodb.net/sistema_curriculos"
 MONGO_DB_NAME = "sistema_curriculos"
 
 def import_users():

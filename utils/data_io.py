@@ -10,7 +10,7 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 
 # Configuração do MongoDB
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://admin:admin@labbd.tapfnsh.mongodb.net/sistema_curriculos")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "sistema_curriculos")
 
 _client: Optional[MongoClient] = None
@@ -176,35 +176,93 @@ def check_candidatura_exists(vaga_id: str, candidato_username: str) -> bool:
 
 
 def calcular_score_curriculo(curriculo: Dict[str, Any], vaga: Dict[str, Any]) -> float:
-    """Calcula score de compatibilidade entre currículo e vaga."""
+    """
+    Calcula score de compatibilidade entre currículo e vaga usando Full Text Search do MongoDB.
+    
+    O score é calculado automaticamente pelo MongoDB através de:
+    1. Text Search Score (60%): MongoDB calcula similaridade textual entre skills, 
+       formação e experiência do currículo vs. descrição e skills da vaga
+    2. Localização (20%): Match exato de estado/cidade
+    3. Experiência (20%): Anos de experiência do candidato
+    
+    Args:
+        curriculo: Dicionário com dados do currículo
+        vaga: Dicionário com dados da vaga
+        
+    Returns:
+        Score de 0 a 100 representando compatibilidade
+    """
     score = 0.0
     
-    # Skills matching (peso 60%)
-    if "skills" in curriculo and "skills" in vaga:
-        curriculo_skills = set([s.strip().lower() for s in str(curriculo.get("skills", "")).split(",")])
-        vaga_skills = set([s.strip().lower() for s in str(vaga.get("skills", "")).split(",")])
+    try:
+        # 1. Full Text Search Score (60%) - Usa índice de texto do MongoDB
+        collection = get_collection("curriculos")
         
-        if vaga_skills:
-            skills_match = len(curriculo_skills & vaga_skills) / len(vaga_skills)
-            score += skills_match * 60
-    
-    # Localização (peso 20%)
-    if curriculo.get("estado") == vaga.get("estado"):
-        score += 20
-    elif curriculo.get("cidade") == vaga.get("cidade"):
-        score += 10
-    
-    # Experiência (peso 20%)
-    experiencia_str = str(curriculo.get("experiencia", "0"))
-    import re
-    match = re.search(r"(\d+)", experiencia_str)
-    if match:
-        anos_exp = int(match.group(1))
-        if anos_exp >= 5:
+        # Criar query de busca textual com base nos requisitos da vaga
+        search_terms = []
+        if vaga.get("skills"):
+            search_terms.append(str(vaga.get("skills")))
+        if vaga.get("descricao"):
+            search_terms.append(str(vaga.get("descricao")))
+        
+        search_query = " ".join(search_terms)
+        
+        if search_query and curriculo.get("_id"):
+            # Buscar o currículo específico com text search score
+            result = collection.find_one(
+                {
+                    "_id": curriculo.get("_id"),
+                    "$text": {"$search": search_query}
+                },
+                {"score": {"$meta": "textScore"}}
+            )
+            
+            if result and "score" in result:
+                # Normalizar o score do MongoDB (geralmente 0.5-1.5) para 0-60
+                text_score = min(result["score"] / 1.5, 1.0) * 60
+                score += text_score
+            else:
+                # Fallback: comparação simples de skills se não houver índice de texto
+                curriculo_skills = set([s.strip().lower() for s in str(curriculo.get("skills", "")).split(",")])
+                vaga_skills = set([s.strip().lower() for s in str(vaga.get("skills", "")).split(",")])
+                
+                if vaga_skills:
+                    skills_match = len(curriculo_skills & vaga_skills) / len(vaga_skills)
+                    score += skills_match * 60
+        
+        # 2. Localização (peso 20%)
+        if curriculo.get("estado") == vaga.get("estado"):
             score += 20
-        elif anos_exp >= 3:
-            score += 15
-        elif anos_exp >= 1:
+        elif curriculo.get("cidade") == vaga.get("cidade"):
             score += 10
+        
+        # 3. Experiência (peso 20%)
+        experiencia_str = str(curriculo.get("experiencia", "0"))
+        import re
+        match = re.search(r"(\d+)", experiencia_str)
+        if match:
+            anos_exp = int(match.group(1))
+            if anos_exp >= 5:
+                score += 20
+            elif anos_exp >= 3:
+                score += 15
+            elif anos_exp >= 1:
+                score += 10
+    
+    except Exception as e:
+        # Em caso de erro, usar método de fallback
+        print(f"Erro ao calcular score com Full Text Search: {e}")
+        
+        # Fallback: comparação simples
+        if "skills" in curriculo and "skills" in vaga:
+            curriculo_skills = set([s.strip().lower() for s in str(curriculo.get("skills", "")).split(",")])
+            vaga_skills = set([s.strip().lower() for s in str(vaga.get("skills", "")).split(",")])
+            
+            if vaga_skills:
+                skills_match = len(curriculo_skills & vaga_skills) / len(vaga_skills)
+                score += skills_match * 60
+        
+        if curriculo.get("estado") == vaga.get("estado"):
+            score += 20
     
     return round(score, 2)

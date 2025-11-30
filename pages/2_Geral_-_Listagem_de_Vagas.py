@@ -1,6 +1,6 @@
 import streamlit as st
 
-from utils.data_io import load_vagas, get_vaga_by_id, load_curriculos_by_candidato, add_candidatura, check_candidatura_exists, calcular_score_curriculo, load_curriculos
+from utils.data_io import load_vagas, calcular_score_curriculo, load_curriculos
 from utils.ui import ensure_session_defaults
 
 st.set_page_config(page_title="Vagas Abertas", page_icon="📋", layout="wide")
@@ -58,9 +58,9 @@ else:
 
 st.dataframe(vagas_exibir, width="stretch")
 
-# Seção de detalhes e candidatura
+# Seção de detalhes da vaga
 st.divider()
-st.subheader("Detalhes da Vaga e Candidatura")
+st.subheader("Detalhes da Vaga")
 
 if "id" in vagas_exibir.columns:
     vaga_ids = vagas_exibir["id"].tolist()
@@ -74,48 +74,13 @@ if "id" in vagas_exibir.columns:
         vaga = vagas_exibir[vagas_exibir["id"] == vaga_selecionada_id].iloc[0].to_dict()
         
         # Mostrar detalhes da vaga
-        col1, col2 = st.columns([2, 1])
-        with col1:
-            st.markdown(f"### {vaga.get('titulo', 'Sem título')}")
-            st.markdown(f"**Empresa:** {vaga.get('empresa', 'N/A')}")
-            st.markdown(f"**Localização:** {vaga.get('cidade', 'N/A')}, {vaga.get('estado', 'N/A')}")
-            st.markdown(f"**Tipo:** {vaga.get('tipo_contratacao', 'N/A')}")
-            st.markdown(f"**Salário:** {vaga.get('salario', 'N/A')}")
-            st.markdown(f"**Descrição:** {vaga.get('descricao', 'N/A')}")
-            st.markdown(f"**Skills requeridas:** {vaga.get('skills', 'N/A')}")
-        
-        with col2:
-            # Botão de candidatura (apenas para candidatos logados)
-            if st.session_state.authenticated and st.session_state.perfil == "candidato":
-                st.info("💼 Candidatar-se a esta vaga")
-                
-                # Verificar se já se candidatou
-                ja_candidatou = check_candidatura_exists(vaga_selecionada_id, st.session_state.username)
-                
-                if ja_candidatou:
-                    st.success("✓ Você já se candidatou a esta vaga")
-                else:
-                    # Listar currículos do candidato
-                    meus_curriculos = load_curriculos_by_candidato(st.session_state.username)
-                    
-                    if meus_curriculos.empty:
-                        st.warning("Você precisa cadastrar um currículo primeiro")
-                        st.page_link("pages/4_Candidato_-_Cadastro_de_Curriculo.py", label="Cadastrar currículo", icon="📝")
-                    else:
-                        curriculo_id = st.selectbox(
-                            "Escolha o currículo para candidatura",
-                            meus_curriculos["id"].tolist() if "id" in meus_curriculos.columns else []
-                        )
-                        
-                        if st.button("Candidatar-se", type="primary"):
-                            try:
-                                add_candidatura(vaga_selecionada_id, st.session_state.username, curriculo_id)
-                                st.success("Candidatura enviada com sucesso!")
-                                st.rerun()
-                            except ValueError as e:
-                                st.error(str(e))
-            elif not st.session_state.authenticated:
-                st.info("Faça login como candidato para se candidatar")
+        st.markdown(f"### {vaga.get('titulo', 'Sem título')}")
+        st.markdown(f"**Empresa:** {vaga.get('empresa', 'N/A')}")
+        st.markdown(f"**Localização:** {vaga.get('cidade', 'N/A')}, {vaga.get('estado', 'N/A')}")
+        st.markdown(f"**Tipo:** {vaga.get('tipo_contratacao', 'N/A')}")
+        st.markdown(f"**Salário:** {vaga.get('salario', 'N/A')}")
+        st.markdown(f"**Descrição:** {vaga.get('descricao', 'N/A')}")
+        st.markdown(f"**Skills requeridas:** {vaga.get('skills', 'N/A')}")
         
         # Mostrar melhores currículos para esta vaga (apenas para empregadores e admins)
         if st.session_state.authenticated and st.session_state.perfil in ["empregador", "administrador"]:
