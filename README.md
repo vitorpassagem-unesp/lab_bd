@@ -2,6 +2,7 @@
 
 > **Trabalho para a disciplina de Laboratório de Banco de Dados, UNESP Rio Claro, 2025.**  
 > **Alunos: Vitor Passagem e Pedro Bastos**
+
 Deploy de produção: [Streamlit Cloud](https://sistema-curriculos.streamlit.app/)
 
 # Portal de Oportunidades - Documentação Completa
