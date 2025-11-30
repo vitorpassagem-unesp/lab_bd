@@ -43,7 +43,7 @@ Deploy de produção: [Streamlit Cloud](https://sistema-curriculos.streamlit.app
 
 - **Frontend:** [Streamlit](https://streamlit.io/) (UI, navegação, autenticação)
 - **Backend:** Python 3.8+, [PyMongo](https://pymongo.readthedocs.io/) (acesso ao MongoDB)
-- **Banco de Dados:** [MongoDB Atlas](https://www.mongodb.com/atlas) (coleções: `usuarios`, `vagas`, `curriculos`)
+- **Banco de Dados:** [MongoDB Atlas](https://www.mongodb.com/atlas) (coleções: `usuarios`, `vagas`, `curriculos`, `empresas`)
 - **Busca Inteligente (RAG):** [Google Generative AI (Gemini)](https://ai.google.dev/) + MongoDB Atlas Vector Search
 - **Outros:** Pandas, Protobuf
 
