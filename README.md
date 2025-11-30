@@ -2,7 +2,18 @@
 > **Trabalho para a disciplina de Laboratório de Banco de Dados, UNESP Rio Claro, 2025.**  
 > **Alunos: Vitor Passagem e Pedro Bastos**
 
+
 # Portal de Oportunidades - Documentação Completa
+
+## Usuários de Teste
+
+Estes usuários podem ser utilizados para acessar o sistema em diferentes perfis:
+
+| Login      | Senha      | Perfil         |
+|------------|------------|---------------|
+| admin      | admin      | Administrador  |
+| candidato  | candidato  | Candidato      |
+| empregador | empregador | Empregador     |
 
 Um sistema profissional de gestão de vagas e currículos com busca inteligente (RAG), controle de acesso por perfil, e integração com MongoDB Atlas e Google Gemini (Generative AI).
 
